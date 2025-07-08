@@ -63,7 +63,7 @@ func (report *Report) PersistReport() error {
 	timestampDir := fmt.Sprintf("%s/%d", reportDir, report.Timestamp)
 	_, err = os.Stat(timestampDir)
 	if err != nil {
-		err = os.Mkdir(timestampDir, 0755)
+		err = os.MkdirAll(timestampDir, 0755)
 		if err != nil {
 			return err
 		}
