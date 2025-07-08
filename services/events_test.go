@@ -8,7 +8,6 @@ import (
 	"github.com/DoniLite/GhostifyBot/services"
 )
 
-
 func TestCreateEvent_ShouldRegisterAndReturnSameEvent(t *testing.T) {
 	bus := services.EventBus
 
