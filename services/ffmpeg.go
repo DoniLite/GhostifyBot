@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -179,7 +180,7 @@ func (m *MediaOptimizer) Optimize() error {
 
 	result := <-done
 	if result.Error() != "" {
-		return fmt.Errorf("transcription error: %v", result.Error)
+		return fmt.Errorf("transcription error: %v", result.Error())
 	}
 
 	fmt.Printf("Optimization finished: %s -> %s\n", m.InputPath, m.OutputPath)
@@ -208,7 +209,7 @@ func (m *MediaOptimizer) OptimizeWithCallback(progressCallback func(float64)) er
 
 	result := <-done
 	if result.Error() != "" {
-		return fmt.Errorf("transcription error: %v", result.Error)
+		return fmt.Errorf("transcription error: %v", result.Error())
 	}
 
 	return nil
@@ -360,4 +361,12 @@ func Transcode() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func IsFFmpegAvailable() bool {
+	cmd := exec.Command("ffmpeg", "-version")
+	if err := cmd.Run(); err != nil {
+		return false
+	}
+	return true
 }
