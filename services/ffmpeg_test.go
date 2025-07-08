@@ -8,7 +8,6 @@ import (
 	"testing"
 )
 
-
 func createRealTestFiles(t *testing.T) (string, string, string) {
 	tempDir, err := os.MkdirTemp("", "media_optimizer_test")
 	if err != nil {
@@ -17,7 +16,7 @@ func createRealTestFiles(t *testing.T) (string, string, string) {
 
 	testVideoPath := filepath.Join(tempDir, "test_video.mp4")
 	testAudioPath := filepath.Join(tempDir, "test_audio.mp3")
-	
+
 	if IsFFmpegAvailable() {
 		err = createTestVideo(testVideoPath)
 		if err != nil {
@@ -26,7 +25,7 @@ func createRealTestFiles(t *testing.T) (string, string, string) {
 			videoFile.WriteString("fake video")
 			videoFile.Close()
 		}
-		
+
 		err = createTestAudio(testAudioPath)
 		if err != nil {
 			t.Logf("Audio test creation not work: %v", err)
@@ -38,7 +37,7 @@ func createRealTestFiles(t *testing.T) (string, string, string) {
 		videoFile, _ := os.Create(testVideoPath)
 		videoFile.WriteString("fake video")
 		videoFile.Close()
-		
+
 		audioFile, _ := os.Create(testAudioPath)
 		audioFile.WriteString("fake audio")
 		audioFile.Close()
@@ -392,7 +391,6 @@ func TestIntegrationOptimizeWithFFmpeg(t *testing.T) {
 		t.Errorf("optimizing error with FFmpeg: %v", err)
 	}
 }
-
 
 func createTestVideo(outputPath string) error {
 	cmd := fmt.Sprintf("-f lavfi -i testsrc=duration=1:size=320x240:rate=1 -c:v libx264 -preset ultrafast -y %s", outputPath)
