@@ -6,36 +6,31 @@ import (
     tr "github.com/anacrolix/torrent"
 )
 
-// Télécharge le fichier torrent depuis l'URL spécifiée et retourne le chemin du fichier téléchargé.
+// Downloading a torrent file from source based on the provided URL
 func DownloadTorrentFile(url, destinationDir string) (string, error) {
-    // Implémentez le téléchargement du fichier torrent depuis l'URL.
-    // Vous pouvez utiliser un package HTTP pour télécharger le fichier et l'enregistrer dans destinationDir.
-    // Retournez le chemin complet du fichier téléchargé.
-    return "", fmt.Errorf("fonction non implémentée")
+    return "", fmt.Errorf("not implemented function")
 }
 
-// Télécharge les fichiers du torrent spécifié par le chemin du fichier torrent.
+// Downloading a torrent file specified in a filepath directory.
 func DownloadFromTorrentFile(torrentFilePath, downloadDir string) error {
-    // Crée un nouveau client torrent
+    // creating new torrent
     clientConfig := tr.NewDefaultClientConfig()
     client, err := tr.NewClient(clientConfig)
     if err != nil {
-        return fmt.Errorf("erreur lors de la création du client torrent : %v", err)
+        return fmt.Errorf("error during the torrent client creation : %v", err)
     }
     defer client.Close()
 
-    // Ajoute le torrent depuis le fichier
     torrent, err := client.AddTorrentFromFile(torrentFilePath)
     if err != nil {
-        return fmt.Errorf("erreur lors de l'ajout du torrent : %v", err)
+        return fmt.Errorf("error during the torrent adding : %v", err)
     }
 
 	clientConfig.DataDir = downloadDir
 
-    // Attendre que les métadonnées soient disponibles
+    // Waiting to get the metadata
     <-torrent.GotInfo()
 
-    // Définir le répertoire de téléchargement
     torrent.DownloadAll()
     
     client.WaitAll()
@@ -43,28 +38,25 @@ func DownloadFromTorrentFile(torrentFilePath, downloadDir string) error {
     return nil
 }
 
-// Télécharge les fichiers du torrent spécifié par le magnet link.
+// Download torrent file specified by the magnet link.
 func DownloadFromMagnetLink(magnetLink, downloadDir string) error {
-    // Crée un nouveau client torrent
     clientConfig := tr.NewDefaultClientConfig()
     client, err := tr.NewClient(clientConfig)
     if err != nil {
-        return fmt.Errorf("erreur lors de la création du client torrent : %v", err)
+        return fmt.Errorf("error during the torrent client creation : %v", err)
     }
     defer client.Close()
 
-    // Ajoute le torrent depuis le magnet link
+    // Adding the magnet link
     torrent, err := client.AddMagnet(magnetLink)
     if err != nil {
-        return fmt.Errorf("erreur lors de l'ajout du magnet link : %v", err)
+        return fmt.Errorf("error during the magnet link adding : %v", err)
     }
 
 	clientConfig.DataDir = downloadDir
 
-    // Attendre que les métadonnées soient disponibles
     <-torrent.GotInfo()
 
-    // Définir le répertoire de téléchargement
     torrent.DownloadAll()
 
     
@@ -74,7 +66,7 @@ func DownloadFromMagnetLink(magnetLink, downloadDir string) error {
 }
 
 
-// Fonction utilitaire pour vérifier si une chaîne est un lien magnet
+// Util func to check if the provided link is a magnet link
 func IsMagnet(link string) bool {
 	return len(link) > 8 && link[:8] == "magnet:?"
 }
