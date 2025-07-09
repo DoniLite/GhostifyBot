@@ -1,5 +1,5 @@
 APP_NAME=ghostify-bot
-BIN_OUTPUT=./build/$(APP_NAME)
+BIN_OUTPUT=./bin/$(APP_NAME)
 SRC=main.go
 
 build:
