@@ -46,7 +46,7 @@ You can see the full list in the [`go.mod`](https://github.com/DoniLite/Ghostify
 
 ---
 
-## 📦 Installation
+## Installation
 
 > **Requirements:**
 
@@ -84,7 +84,7 @@ make run
 
 ---
 
-## 🧩 Features Roadmap
+## Features Roadmap
 
 - [x] Torrent downloading via magnet or .torrent (Processing...)
 - [x] ffmpeg integration for media processing (Processing...)
@@ -107,7 +107,7 @@ Contributions are welcome! Whether you're fixing bugs, improving performance, or
 3. Make your changes
 4. Commit: `git commit -am 'Add my feature'`
 5. Push: `git push origin feature/my-new-feature`
-6. Open a Pull Request 🎉
+6. Open a Pull Request targeting the `develop` branch
 
 ---
 
