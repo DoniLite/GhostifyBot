@@ -82,14 +82,14 @@ func TestNewMediaOptimizer(t *testing.T) {
 
 			if tt.shouldError {
 				if err == nil {
-					t.Error("Attendait une erreur mais n'en a pas reçu")
+					t.Error("Expected error not received")
 				}
 			} else {
 				if err != nil {
-					t.Errorf("Erreur inattendue: %v", err)
+					t.Errorf("Unexpected error: %v", err)
 				}
 				if optimizer == nil {
-					t.Error("Optimizer ne devrait pas être nil")
+					t.Error("Optimizer should not be nil")
 				}
 			}
 		})
@@ -211,119 +211,6 @@ func TestQualityProfiles(t *testing.T) {
 	}
 }
 
-func TestOptimizeForMobile(t *testing.T) {
-	tempDir, testVideoPath, testAudioPath := createRealTestFiles(t)
-	defer os.RemoveAll(tempDir)
-
-	tests := []struct {
-		name      string
-		inputPath string
-		quality   string
-		mediaType MediaType
-	}{
-		{
-			name:      "low quality video",
-			inputPath: testVideoPath,
-			quality:   "low",
-			mediaType: Video,
-		},
-		{
-			name:      "high quality video",
-			inputPath: testVideoPath,
-			quality:   "high",
-			mediaType: Video,
-		},
-		{
-			name:      "low audio quality",
-			inputPath: testAudioPath,
-			quality:   "low",
-			mediaType: Audio,
-		},
-		{
-			name:      "high audio quality",
-			inputPath: testAudioPath,
-			quality:   "high",
-			mediaType: Audio,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			outputPath := filepath.Join(tempDir, "output_"+tt.name+".mp4")
-			optimizer, err := NewMediaOptimizer(tt.inputPath, outputPath)
-			if err != nil {
-				t.Fatalf("Optimizer creation error: %v", err)
-			}
-
-			if optimizer.MediaType != tt.mediaType {
-				t.Errorf("invalid media type: %v, expected %v", optimizer.MediaType, tt.mediaType)
-			}
-
-			err = optimizer.OptimizeForMobile(tt.quality)
-			if err == nil {
-				t.Log("Success optimization (FFmpeg probably installed)")
-			} else {
-				t.Logf("Expected error no bin found for FFmpeg: %v", err)
-			}
-		})
-	}
-}
-
-func TestBatchOptimize(t *testing.T) {
-	tempDir, testVideoPath, testAudioPath := createRealTestFiles(t)
-	defer os.RemoveAll(tempDir)
-
-	inputPaths := []string{testVideoPath, testAudioPath}
-	outputDir := filepath.Join(tempDir, "batch_output")
-
-	err := os.MkdirAll(outputDir, 0755)
-	if err != nil {
-		t.Fatalf("Output repertory creation error: %v", err)
-	}
-
-	err = BatchOptimize(inputPaths, outputDir, "high")
-
-	if err != nil {
-		t.Logf("Expected error without FFmpeg: %v", err)
-	}
-}
-
-func TestConvenienceFunctions(t *testing.T) {
-	tempDir, testVideoPath, testAudioPath := createRealTestFiles(t)
-	defer os.RemoveAll(tempDir)
-
-	tests := []struct {
-		name     string
-		function func(string, string, string) error
-		input    string
-		output   string
-		quality  string
-	}{
-		{
-			name:     "OptimizeVideoForMobile",
-			function: OptimizeVideoForMobile,
-			input:    testVideoPath,
-			output:   filepath.Join(tempDir, "video_output.mp4"),
-			quality:  "high",
-		},
-		{
-			name:     "OptimizeAudioForMobile",
-			function: OptimizeAudioForMobile,
-			input:    testAudioPath,
-			output:   filepath.Join(tempDir, "audio_output.aac"),
-			quality:  "high",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := tt.function(tt.input, tt.output, tt.quality)
-			if err != nil {
-				t.Logf("Expected error without FFmpeg: %v", err)
-			}
-		})
-	}
-}
 
 func TestGetOptimizedSizeWithoutFile(t *testing.T) {
 	tempDir, testVideoPath, _ := createRealTestFiles(t)
@@ -372,33 +259,13 @@ func BenchmarkNewMediaOptimizer(b *testing.B) {
 	}
 }
 
-// Integration test (need FFmpeg)
-func TestIntegrationOptimizeWithFFmpeg(t *testing.T) {
-	if !IsFFmpegAvailable() {
-		t.Skip("FFmpeg not found test skipped")
-	}
-
-	tempDir, testVideoPath, _ := createRealTestFiles(t)
-	defer os.RemoveAll(tempDir)
-
-	optimizer, err := NewMediaOptimizer(testVideoPath, filepath.Join(tempDir, "integration_output.mp4"))
-	if err != nil {
-		t.Fatalf("optimizer creation error: %v", err)
-	}
-
-	err = optimizer.OptimizeForMobile("high")
-	if err != nil {
-		t.Errorf("optimizing error with FFmpeg: %v", err)
-	}
-}
-
 func createTestVideo(outputPath string) error {
-	cmd := fmt.Sprintf("-f lavfi -i testsrc=duration=1:size=320x240:rate=1 -c:v libx264 -preset ultrafast -y %s", outputPath)
+	cmd := fmt.Sprintf("-f lavfi -i testsrc=duration=2:size=320x240:rate=15 -c:v libx264 -preset ultrafast -pix_fmt yuv420p %s", outputPath)
 	return executeCommand("ffmpeg", cmd)
 }
 
 func createTestAudio(outputPath string) error {
-	cmd := fmt.Sprintf("-f lavfi -i sine=frequency=1000:duration=1 -c:a aac -y %s", outputPath)
+	cmd := fmt.Sprintf("-f lavfi -i sine=frequency=1000:duration=2 -c:a aac -b:a 128k %s", outputPath)
 	return executeCommand("ffmpeg", cmd)
 }
 

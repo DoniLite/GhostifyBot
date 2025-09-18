@@ -167,24 +167,36 @@ func (m *MediaOptimizer) Optimize() error {
 		return fmt.Errorf("transcoder initialization error: %v", err)
 	}
 
+	if m.transcoder.MediaFile() == nil {
+		return fmt.Errorf("failed to initialize transcoder: media file is nil")
+	}
+
 	m.configureTranscoder()
 
 	done := m.transcoder.Run(true)
 
 	progress := m.transcoder.Output()
-	go func() {
-		for p := range progress {
-			fmt.Printf("Progression: %b\n", p.Progress)
-		}
-	}()
+	if progress != nil {
+		go func() {
+			for p := range progress {
+				fmt.Printf("Progression: %.2f%%\n", p.Progress)
+			}
+		}()
+	}
 
 	result := <-done
+	if result == nil {
+		fmt.Printf("Optimization finished successfully: %s -> %s\n", m.InputPath, m.OutputPath)
+		return nil
+	}
+
 	if result.Error() != "" {
 		return fmt.Errorf("transcription error: %v", result.Error())
 	}
 
 	fmt.Printf("Optimization finished: %s -> %s\n", m.InputPath, m.OutputPath)
 	return nil
+
 }
 
 // Running the optimization process with a callback func to take the progress
@@ -194,18 +206,24 @@ func (m *MediaOptimizer) OptimizeWithCallback(progressCallback func(float64)) er
 		return fmt.Errorf("transcoder initialization error: %v", err)
 	}
 
+	if m.transcoder.MediaFile() == nil {
+		return fmt.Errorf("failed to initialize transcoder: media file is nil")
+	}
+
 	m.configureTranscoder()
 
 	done := m.transcoder.Run(true)
-	progress := m.transcoder.Output()
 
-	go func() {
-		for p := range progress {
-			if progressCallback != nil {
-				progressCallback(p.Progress)
+	progress := m.transcoder.Output()
+	if progress != nil {
+		go func() {
+			for p := range progress {
+				if progressCallback != nil {
+					progressCallback(p.Progress)
+				}
 			}
-		}
-	}()
+		}()
+	}
 
 	result := <-done
 	if result.Error() != "" {
